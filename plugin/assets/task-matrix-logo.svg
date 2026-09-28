@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 168" role="img" aria-labelledby="title desc">
+  <title id="title">Task Matrix</title>
+  <desc id="desc">A warm gold inn sign enclosing a nine-square task matrix, beside the words Task Matrix in an elegant serif.</desc>
+  <defs>
+    <linearGradient id="gold" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ead59a"/>
+      <stop offset=".52" stop-color="#bd9851"/>
+      <stop offset="1" stop-color="#8d6b34"/>
+    </linearGradient>
+  </defs>
+  <!-- An original inn-sign silhouette framing a nine-cell planning matrix. -->
+  <g transform="translate(17 13)" fill="none" stroke="url(#gold)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M65 3c-5 9-18 12-32 13v46c0 29 17 48 32 57 15-9 32-28 32-57V16C83 15 70 12 65 3Z" stroke-width="3.5"/>
+    <path d="M65 12c-8 7-17 9-24 10v40c0 22 12 37 24 45 12-8 24-23 24-45V22c-7-1-16-3-24-10Z" stroke-width="1.5" opacity=".75"/>
+    <path d="M65 25v65M42 47h46M42 69h46" stroke-width="2.3"/>
+    <path d="m49 38 3 3 5-6M72 60l3 3 5-6M49 82l3 3 5-6" stroke-width="2.5"/>
+    <path d="M65 0v-7m0 133v-7M29 18l-7-4m79 4 7-4M29 99l-7 4m79-4 7 4" stroke-width="2"/>
+    <path d="M52 119c4 3 9 5 13 7 4-2 9-4 13-7" stroke-width="2"/>
+  </g>
+  <g fill="#252630">
+    <text x="151" y="84" font-family="Georgia, 'Times New Roman', serif" font-size="56" letter-spacing="1.1">Task Matrix</text>
+  </g>
+  <path d="M153 103h412" stroke="url(#gold)" stroke-width="1.5"/>
+  <path d="M572 103h16m-8-4 4 4-4 4" fill="none" stroke="url(#gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="154" y="128" fill="#927543" font-family="Georgia, 'Times New Roman', serif" font-size="13" letter-spacing="5.2">A PLACE FOR EVERY TASK</text>
+</svg>
