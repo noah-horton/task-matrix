@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "task-matrix": {
+      "command": "/usr/bin/python3",
+      "args": ["/Users/noahhorton/plugins/task-matrix/server.py", "mcp"],
+      "env": {
+        "TASK_MATRIX_DATA": "/Users/noahhorton/Documents/ChatGPT/ToDoWithCodex/data/tasks.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+data/tasks.json
+data/tasks.lock
+data/tasks.*.json
+__pycache__/

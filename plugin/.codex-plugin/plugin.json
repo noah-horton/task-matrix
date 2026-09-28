@@ -1,0 +1,18 @@
+{
+  "name": "task-matrix",
+  "version": "1.0.0",
+  "description": "Noah's personal 3×3 task matrix with local task tools.",
+  "author": {
+    "name": "Noah Horton"
+  },
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Task Matrix",
+    "shortDescription": "Organize tasks by importance and urgency.",
+    "longDescription": "A private, local task board with Doing and Tracking tasks and matching Codex task tools.",
+    "developerName": "Noah Horton",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": "For any activity involving tasks, first ensure the Task Matrix web server is running at http://127.0.0.1:8765 (check http://127.0.0.1:8765/health; if it is down, start the server process with `python3 ~/plugins/task-matrix/server.py web` and keep it running). Then open http://127.0.0.1:8765/ in Codex's captive browser using the in-app browser tool, and keep the board open while reviewing or updating tasks. Use Task Matrix tools for task data."
+  }
+}
