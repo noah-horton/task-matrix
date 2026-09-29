@@ -47,9 +47,15 @@ def valid_task(task):
         "url": url or "", "dueDate": due or "",
         "importance": task["importance"], "urgency": task["urgency"],
         "doing": task.get("doing") is not False,
+        "today": task.get("today") is True,
         "completed": task.get("completed") is True,
         "createdAt": task.get("createdAt") or dt.datetime.now(dt.timezone.utc).isoformat(),
     }
+    order = task.get("matrixOrder")
+    if order is not None:
+        if type(order) is not int or not 0 <= order <= 9007199254740991:
+            raise ValueError("Matrix order must be a non-negative safe integer.")
+        clean["matrixOrder"] = order
     return clean
 
 
@@ -148,9 +154,9 @@ class Handler(BaseHTTPRequestHandler):
 
 
 TOOLS = [
-    {"name": "list_tasks", "description": "Before any task-related activity, ensure the Task Matrix web server is running and open http://127.0.0.1:8765/ in Codex's captive browser. Then list tasks, optionally filtered by open/completed status, Doing/Tracking, importance, urgency, due date, or a case-insensitive regular expression on the task name. A leading single word followed by a colon classifies a task; use name_regex '^Brett:' to find Brett tasks. Filters combine; status defaults to open, so use status all to include completed tasks.", "inputSchema": {"type": "object", "properties": {"status": {"type": "string", "enum": ["open", "completed", "all"]}, "work_type": {"type": "string", "enum": ["doing", "tracking", "all"]}, "importance": {"type": "string", "enum": ["high", "medium", "low"]}, "urgency": {"type": "string", "enum": ["high", "medium", "low"]}, "due_before": {"type": "string", "description": "Inclusive YYYY-MM-DD cutoff."}, "name_regex": {"type": "string", "description": "Python regular expression searched against task names, case-insensitive by default. Example: ^Brett: matches the Brett prefix; ^(?:Brett|Alice): matches either prefix. Invalid expressions return a tool error."}}, "additionalProperties": False}},
-    {"name": "create_task", "description": "Before any task-related activity, ensure the Task Matrix web server is running and open http://127.0.0.1:8765/ in Codex's captive browser. Then create a task in Noah's local Task Matrix.", "inputSchema": {"type": "object", "required": ["name", "importance", "urgency"], "properties": {"name": {"type": "string"}, "description": {"type": "string"}, "url": {"type": "string"}, "due_date": {"type": "string", "description": "YYYY-MM-DD"}, "importance": {"type": "string", "enum": ["high", "medium", "low"]}, "urgency": {"type": "string", "enum": ["high", "medium", "low"]}, "work_type": {"type": "string", "enum": ["doing", "tracking"], "default": "doing"}}, "additionalProperties": False}},
-    {"name": "update_task", "description": "Before any task-related activity, ensure the Task Matrix web server is running and open http://127.0.0.1:8765/ in Codex's captive browser. Then update task fields by id. Provide only fields to change; completed can reopen a task.", "inputSchema": {"type": "object", "required": ["id"], "properties": {"id": {"type": "string"}, "name": {"type": "string"}, "description": {"type": "string"}, "url": {"type": "string"}, "due_date": {"type": "string"}, "importance": {"type": "string", "enum": ["high", "medium", "low"]}, "urgency": {"type": "string", "enum": ["high", "medium", "low"]}, "work_type": {"type": "string", "enum": ["doing", "tracking"]}, "completed": {"type": "boolean"}}, "additionalProperties": False}},
+    {"name": "list_tasks", "description": "Before any task-related activity, ensure the Task Matrix web server is running and open http://127.0.0.1:8765/ in Codex's captive browser. Then list tasks, optionally filtered by open/completed status, Doing/Tracking, importance, urgency, due date, or a case-insensitive regular expression on the task name. A leading single word followed by a colon classifies a task; use name_regex '^Brett:' to find Brett tasks. Filters combine; status defaults to open, so use status all to include completed tasks.", "inputSchema": {"type": "object", "properties": {"today": {"type": "boolean", "description": "Filter by the persistent Today tag."}, "status": {"type": "string", "enum": ["open", "completed", "all"]}, "work_type": {"type": "string", "enum": ["doing", "tracking", "all"]}, "importance": {"type": "string", "enum": ["high", "medium", "low"]}, "urgency": {"type": "string", "enum": ["high", "medium", "low"]}, "due_before": {"type": "string", "description": "Inclusive YYYY-MM-DD cutoff."}, "name_regex": {"type": "string", "description": "Python regular expression searched against task names, case-insensitive by default. Example: ^Brett: matches the Brett prefix; ^(?:Brett|Alice): matches either prefix. Invalid expressions return a tool error."}}, "additionalProperties": False}},
+    {"name": "create_task", "description": "Before any task-related activity, ensure the Task Matrix web server is running and open http://127.0.0.1:8765/ in Codex's captive browser. Then create a task in Noah's local Task Matrix.", "inputSchema": {"type": "object", "required": ["name", "importance", "urgency"], "properties": {"today": {"type": "boolean", "description": "Include in Today without changing matrix placement."}, "name": {"type": "string"}, "description": {"type": "string"}, "url": {"type": "string"}, "due_date": {"type": "string", "description": "YYYY-MM-DD"}, "importance": {"type": "string", "enum": ["high", "medium", "low"]}, "urgency": {"type": "string", "enum": ["high", "medium", "low"]}, "work_type": {"type": "string", "enum": ["doing", "tracking"], "default": "doing"}}, "additionalProperties": False}},
+    {"name": "update_task", "description": "Before any task-related activity, ensure the Task Matrix web server is running and open http://127.0.0.1:8765/ in Codex's captive browser. Then update task fields by id. Provide only fields to change; completed can reopen a task.", "inputSchema": {"type": "object", "required": ["id"], "properties": {"today": {"type": "boolean", "description": "Add or remove the Today tag."}, "id": {"type": "string"}, "name": {"type": "string"}, "description": {"type": "string"}, "url": {"type": "string"}, "due_date": {"type": "string"}, "importance": {"type": "string", "enum": ["high", "medium", "low"]}, "urgency": {"type": "string", "enum": ["high", "medium", "low"]}, "work_type": {"type": "string", "enum": ["doing", "tracking"]}, "completed": {"type": "boolean"}}, "additionalProperties": False}},
     {"name": "complete_task", "description": "Before any task-related activity, ensure the Task Matrix web server is running and open http://127.0.0.1:8765/ in Codex's captive browser. Then mark a task complete, or reopen it when completed is false.", "inputSchema": {"type": "object", "required": ["id"], "properties": {"id": {"type": "string"}, "completed": {"type": "boolean", "default": True}}, "additionalProperties": False}},
     {"name": "delete_task", "description": "Before any task-related activity, ensure the Task Matrix web server is running and open http://127.0.0.1:8765/ in Codex's captive browser. Then delete a task by id from the local Task Matrix.", "inputSchema": {"type": "object", "required": ["id"], "properties": {"id": {"type": "string"}}, "additionalProperties": False}},
 ]
@@ -172,6 +178,8 @@ def call_tool(name, a):
             result = [t for t in result if t["completed"] == (a.get("status") == "completed")]
         if a.get("work_type", "all") != "all":
             result = [t for t in result if t["doing"] == (a["work_type"] == "doing")]
+        if "today" in a:
+            result = [t for t in result if t["today"] == a["today"]]
         for key in ("importance", "urgency"):
             if a.get(key):
                 result = [t for t in result if t[key] == a[key]]
@@ -182,7 +190,7 @@ def call_tool(name, a):
         return result
     if name == "create_task":
         now = dt.datetime.now(dt.timezone.utc).isoformat()
-        task = valid_task({"id": __import__("uuid").uuid4().hex, "name": a.get("name"), "description": a.get("description"), "url": a.get("url"), "dueDate": a.get("due_date"), "importance": a.get("importance"), "urgency": a.get("urgency"), "doing": a.get("work_type", "doing") == "doing", "completed": False, "createdAt": now})
+        task = valid_task({"id": __import__("uuid").uuid4().hex, "name": a.get("name"), "description": a.get("description"), "url": a.get("url"), "dueDate": a.get("due_date"), "importance": a.get("importance"), "urgency": a.get("urgency"), "doing": a.get("work_type", "doing") == "doing", "completed": False, "today": a.get("today", False), "createdAt": now})
         change_tasks([task])
         return task
     if name in ("update_task", "complete_task", "delete_task"):
@@ -197,13 +205,15 @@ def call_tool(name, a):
         if name == "complete_task":
             update["completed"] = a.get("completed", True)
         else:
-            keys = {"name", "description", "url", "importance", "urgency", "completed"}
+            keys = {"name", "description", "url", "importance", "urgency", "completed", "today"}
             update.update({k: v for k, v in a.items() if k in keys})
             if "due_date" in a:
                 update["dueDate"] = a["due_date"]
             if "work_type" in a:
                 update["doing"] = a["work_type"] == "doing"
         merged = valid_task({**task, **update})
+        if any(merged[key] != task[key] for key in ("importance", "urgency")):
+            merged.pop("matrixOrder", None)
         change_tasks([merged])
         return merged
     raise ValueError("Unknown task tool.")

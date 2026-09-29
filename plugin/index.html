@@ -54,6 +54,14 @@
     .filters { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 11px; background: #e7e2d7; }
     .filter { min-height: 30px; padding: 0 11px; border: 0; border-radius: 8px; color: #6e6d68; background: transparent; font-size: 12px; font-weight: 700; }
     .filter.active { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(21,37,28,.1); }
+    .today-panel { margin-bottom: 20px; padding: 17px; border: 1px solid #d9c79e; border-radius: 16px; background: #faf4e5; transition: background .15s ease; }
+    .today-panel.drag-over { background: #f7edcf; box-shadow: inset 0 0 0 2px #d8b965; }
+    .today-heading { display: flex; align-items: center; gap: 9px; margin-bottom: 5px; }
+    .today-heading h2 { margin: 0; font-size: 16px; }
+    .today-help { margin: 0 0 13px; color: var(--muted); font-size: 12px; }
+    .today-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 8px; }
+    .today-list .empty { min-height: 58px; border: 1px dashed #d9c79e; border-radius: 10px; }
+    .pill.today { color: #855913; background: var(--amber-pale); }
     .board-wrap { overflow-x: auto; border: 1px solid #d9d2c3; border-radius: 16px; background: var(--paper); box-shadow: var(--shadow); }
     .board { display: grid; grid-template-columns: 104px repeat(3, minmax(220px, 1fr)); min-width: 800px; }
     .corner { display: flex; justify-content: flex-end; align-items: flex-end; padding: 16px 13px; color: #89877f; font-size: 10px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
@@ -77,6 +85,10 @@
     .quick-add button:hover { border-color: #cbbd9d; background: #fff4d8; }
     .quick-add button:disabled { opacity: .5; cursor: wait; }
     .task-card { padding: 11px 11px 10px; border: 1px solid #e6dfd0; border-radius: 11px; background: #fffefa; box-shadow: 0 2px 6px rgba(43,39,31,.055); cursor: grab; }
+    .task-card.drop-before, .task-card.drop-after { position: relative; }
+    .task-card.drop-before::before, .task-card.drop-after::after { content: ""; position: absolute; left: 0; right: 0; height: 3px; border-radius: 3px; background: #b58a32; pointer-events: none; }
+    .task-card.drop-before::before { top: -6px; }
+    .task-card.drop-after::after { bottom: -6px; }
     .task-card:active { cursor: grabbing; }
     .task-card.done { opacity: .59; }
     .task-title-row { display: flex; align-items: flex-start; gap: 8px; }
@@ -86,7 +98,17 @@
     .edit-task { width: 25px; height: 25px; flex: 0 0 25px; display: grid; place-items: center; margin: -4px -5px 0 0; padding: 0; border: 0; border-radius: 7px; color: #89877f; background: transparent; opacity: .65; }
     .task-card:hover .edit-task, .edit-task:focus-visible { opacity: 1; background: #f4efe3; }
     .edit-task svg { width: 14px; height: 14px; }
-    .task-description { margin: 7px 0 0 25px; color: #77766f; font-size: 11px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .task-description-row { display: flex; align-items: flex-start; gap: 8px; min-width: 0; margin-top: 7px; }
+    .description-toggle { display: grid; place-items: center; width: 17px; height: 17px; flex: 0 0 17px; padding: 0; border: 0; border-radius: 4px; color: #77766f; background: transparent; }
+    .description-toggle:hover { background: #f4efe3; }
+    .description-toggle:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
+    .description-toggle svg { width: 13px; height: 13px; }
+    .description-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
+    .task-description { flex: 1; min-width: 0; margin: 0; color: #77766f; font-size: 11px; line-height: 1.45; }
+    .description-preview { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .description-full { display: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .description-toggle[aria-expanded="true"] + .task-description .description-preview { display: none; }
+    .description-toggle[aria-expanded="true"] + .task-description .description-full { display: block; }
     .task-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 9px 0 0 25px; }
     .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; border-radius: 20px; background: #eeebe4; color: #686971; font-size: 10px; font-weight: 700; }
     .pill.tracking { color: var(--blue); background: var(--blue-pale); }
@@ -105,6 +127,9 @@
     .done-list { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 8px; }
     .done-list[hidden] { display: none; }
     .done-list .task-card { background: rgba(255,255,255,.7); }
+    .backup-links { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 24px; color: var(--muted); font-size: 11px; }
+    .backup-links button { border: 0; padding: 4px 0; color: inherit; background: transparent; text-decoration: underline; text-underline-offset: 3px; }
+    .backup-links button:hover { color: var(--ink); }
     .toast { position: fixed; right: 22px; bottom: 22px; z-index: 5; padding: 10px 14px; border-radius: 10px; color: #f6e7c0; background: #191b22; box-shadow: var(--shadow); font-size: 12px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: .2s ease; }
     .toast.show { opacity: 1; transform: translateY(0); }
     dialog { width: min(520px, calc(100vw - 28px)); max-height: min(90vh, 760px); padding: 0; overflow: auto; border: 1px solid #d9d2c3; border-radius: 16px; color: var(--ink); background: var(--paper); box-shadow: 0 26px 80px rgba(28,28,34,.24); }
@@ -185,9 +210,6 @@
         <h1 class="sr-only">Task Matrix</h1>
       </div>
       <div class="actions">
-        <button class="button" id="export-button" type="button" title="Download a backup of your tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><span>Export</span></button>
-        <button class="button" id="import-button" type="button" title="Import a task backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 0L8 7m4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>Import</span></button>
-        <input id="import-file" type="file" accept="application/json,.json" hidden>
         <button class="button primary" id="add-button" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>New task</span></button>
       </div>
     </header>
@@ -202,6 +224,11 @@
         </div>
       </div>
     </section>
+    <section class="today-panel" id="today-panel" aria-labelledby="today-title">
+      <div class="today-heading"><h2 id="today-title">Today</h2><span class="pill today" id="today-count" aria-live="polite">0</span></div>
+      <p class="today-help">Drag tasks here to focus on today. They stay in the matrix. Drag them out to remove from Today.</p>
+      <div class="today-list" id="today-list"></div>
+    </section>
     <section class="board-wrap" aria-label="Importance and urgency matrix">
       <div class="board" id="board">
         <div class="corner">Importance</div>
@@ -215,6 +242,12 @@
       <button class="done-toggle" id="done-toggle" type="button" aria-expanded="false" aria-controls="done-list"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 4 6 6-6 6"/></svg><span id="done-label">Completed</span></button>
       <div class="done-list" id="done-list" hidden></div>
     </section>
+    <footer class="backup-links" aria-label="Task backups">
+      <button id="import-button" type="button">Import</button>
+      <span aria-hidden="true">·</span>
+      <button id="export-button" type="button">Export</button>
+      <input id="import-file" type="file" accept="application/json,.json" hidden>
+    </footer>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <dialog id="task-dialog" aria-labelledby="dialog-title">
@@ -238,6 +271,10 @@
           <label class="switch" aria-label="Doing versus tracking"><input id="task-doing" type="checkbox" checked><span></span></label>
         </div>
       </div>
+      <div class="toggle-row">
+        <div class="toggle-copy"><strong>Today</strong><span>Include in your Today list</span></div>
+        <label class="switch" aria-label="Include in Today"><input id="task-today" type="checkbox"><span></span></label>
+      </div>
       <div class="form-footer">
         <button class="button danger" id="delete-button" type="button" hidden>Delete task</button>
         <div class="form-footer-right"><button class="button" id="cancel-button" type="button">Cancel</button><button class="button primary" type="submit">Save task</button></div>
@@ -255,8 +292,11 @@
       let prefixFilter = '';
       let doneOpen = false;
       const quickDrafts = new Map();
+      const expandedDescriptions = new Set();
       let toastTimer;
+      let draggedTask = null;
       const board = document.getElementById('board');
+      const todayPanel = document.getElementById('today-panel');
       const dialog = document.getElementById('task-dialog');
       const form = document.getElementById('task-form');
 
@@ -289,7 +329,7 @@
         }
       }
       async function refreshTasks() {
-        if (dialog.open) return;
+        if (dialog.open || draggedTask) return;
         try {
           const response = await fetch('/api/tasks', { cache: 'no-store' });
           if (!response.ok) return;
@@ -345,18 +385,37 @@
         return (!prefixFilter || taskPrefix(task) === prefixFilter)
           && (filter === 'all' || (filter === 'doing' ? task.doing !== false : task.doing === false));
       }
-      function ordered(list) {
-        return [...list].sort((a, b) => (a.dueDate || '9999-12-31').localeCompare(b.dueDate || '9999-12-31') || (a.createdAt || '').localeCompare(b.createdAt || ''));
+      function ordered(list, manual = false) {
+        const rank = task => Number.isSafeInteger(task.matrixOrder) && task.matrixOrder >= 0 ? task.matrixOrder : Infinity;
+        return [...list].sort((a, b) => (manual ? rank(a) - rank(b) : 0) || (a.dueDate || '9999-12-31').localeCompare(b.dueDate || '9999-12-31') || (a.createdAt || '').localeCompare(b.createdAt || '') || a.id.localeCompare(b.id));
+      }
+      function reorderInCell(task, cell, beforeId) {
+        const inCell = t => !t.completed && t.importance === cell.dataset.importance && t.urgency === cell.dataset.urgency;
+        // Include filtered-out cards so their relative order is preserved.
+        const previous = ordered(tasks.filter(inCell), true);
+        const next = previous.filter(t => t.id !== task.id);
+        const index = next.findIndex(t => t.id === beforeId);
+        next.splice(index < 0 ? next.length : index, 0, task);
+        if (previous.length === next.length && previous.every((t, i) => t.id === next[i].id)) return false;
+        task.importance = cell.dataset.importance;
+        task.urgency = cell.dataset.urgency;
+        next.forEach((t, i) => { t.matrixOrder = i; });
+        return true;
       }
       function card(task) {
+        const description = String(task.description || '');
+        const descriptionLines = description.split(/\r\n|[\r\n]/);
+        const descriptionPreview = descriptionLines[0] + (descriptionLines.length > 1 ? '…' : '');
+        const descriptionExpanded = expandedDescriptions.has(task.id);
         const url = safeUrl(task.url);
         const due = task.dueDate ? `<span class="pill due${dueClass(task.dueDate)}">${escapeHtml(dateLabel(task.dueDate))}</span>` : '';
         const link = url ? `<span class="pill"><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Open external task link">↗ Link</a></span>` : '';
         const role = task.doing === false ? '<span class="pill tracking">Tracking</span>' : '';
+        const todayTag = task.today ? '<span class="pill today">Today</span>' : '';
         return `<article class="task-card${task.completed ? ' done' : ''}" data-id="${escapeHtml(task.id)}" ${task.completed ? '' : 'draggable="true"'}>
           <div class="task-title-row"><input class="complete-toggle" type="checkbox" ${task.completed ? 'checked' : ''} aria-label="Mark ${escapeHtml(task.name)} complete"><span class="task-title">${escapeHtml(task.name)}</span><button class="edit-task" type="button" aria-label="Edit ${escapeHtml(task.name)}" title="Edit task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14 5 5 5M4 20l4.3-.9L19 8.4a2.1 2.1 0 0 0-3-3L5.3 16.1 4 20Z"/></svg></button></div>
-          ${task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : ''}
-          ${role || due || link ? `<div class="task-meta">${role}${due}${link}</div>` : ''}
+          ${description ? `<div class="task-description-row"><button class="description-toggle" type="button" aria-expanded="${descriptionExpanded}" aria-label="${descriptionExpanded ? 'Collapse' : 'Expand'} description for ${escapeHtml(task.name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button><p class="task-description"><span class="description-preview">${escapeHtml(descriptionPreview)}</span><span class="description-full">${escapeHtml(description)}</span></p></div>` : ''}
+          ${todayTag || role || due || link ? `<div class="task-meta">${todayTag}${role}${due}${link}</div>` : ''}
         </article>`;
       }
       function cellId(importance, urgency) { return `cell-${importance}-${urgency}`; }
@@ -373,7 +432,7 @@
             cell.className = 'cell'; cell.id = cellId(importance, urgency);
             cell.dataset.importance = importance; cell.dataset.urgency = urgency;
             const list = document.createElement('div'); list.className = 'task-list';
-            const items = ordered(tasks.filter(t => !t.completed && t.importance === importance && t.urgency === urgency && visible(t)));
+            const items = ordered(tasks.filter(t => !t.completed && t.importance === importance && t.urgency === urgency && visible(t)), true);
             list.innerHTML = items.length ? items.map(card).join('') : `<div class="empty">${filter === 'all' && !prefixFilter ? 'No tasks here yet' : 'No matching tasks'}</div>`;
             const key = cellId(importance, urgency);
             const quickAdd = document.createElement('form');
@@ -383,6 +442,9 @@
           }
         }
         const open = tasks.filter(t => !t.completed && visible(t));
+        const todayTasks = ordered(open.filter(t => t.today));
+        document.getElementById('today-count').textContent = todayTasks.length;
+        document.getElementById('today-list').innerHTML = todayTasks.length ? todayTasks.map(card).join('') : `<div class="empty">${filter === 'all' && !prefixFilter ? 'Drop a task here to add it to Today' : 'No matching tasks in Today'}</div>`;
         const count = open.length;
         const urgent = open.filter(t => t.dueDate && t.dueDate < today()).length;
         document.getElementById('summary-copy').innerHTML = `<strong>${count}</strong> open ${count === 1 ? 'task' : 'tasks'}${urgent ? ` <span style="color:var(--rose)">· ${urgent} overdue</span>` : ''}`;
@@ -403,18 +465,85 @@
             if (task) { task.completed = checkbox.checked; persist(); toast(task.completed ? 'Task completed' : 'Task reopened'); }
           });
           el.querySelector('.edit-task')?.addEventListener('click', () => openEditor(id));
-          el.addEventListener('dragstart', event => { event.dataTransfer.setData('text/task-id', id); event.dataTransfer.effectAllowed = 'move'; });
-        });
-        document.querySelectorAll('.cell').forEach(cell => {
-          cell.addEventListener('dragover', event => { event.preventDefault(); cell.classList.add('drag-over'); });
-          cell.addEventListener('dragleave', () => cell.classList.remove('drag-over'));
-          cell.addEventListener('drop', event => {
-            event.preventDefault(); cell.classList.remove('drag-over');
-            const task = tasks.find(t => t.id === event.dataTransfer.getData('text/task-id'));
-            if (task) { task.importance = cell.dataset.importance; task.urgency = cell.dataset.urgency; persist(); toast('Task moved'); }
+          el.querySelector('.description-toggle')?.addEventListener('click', () => {
+            const expanded = !expandedDescriptions.has(id);
+            if (expanded) expandedDescriptions.add(id);
+            else expandedDescriptions.delete(id);
+            // Keep copies in Today and the matrix in sync without replacing the focused button.
+            document.querySelectorAll('.task-card').forEach(cardEl => {
+              if (cardEl.dataset.id !== id) return;
+              const button = cardEl.querySelector('.description-toggle');
+              button?.setAttribute('aria-expanded', String(expanded));
+              button?.setAttribute('aria-label', `${expanded ? 'Collapse' : 'Expand'} description for ${tasks.find(t => t.id === id)?.name || ''}`);
+            });
+          });
+          el.addEventListener('dragstart', event => {
+            if (event.target.closest('a') || tasks.find(t => t.id === id)?.completed) { event.preventDefault(); return; }
+            draggedTask = { id, fromToday: todayPanel.contains(el) };
+            event.dataTransfer.setData('text/task-id', id);
+            event.dataTransfer.effectAllowed = 'move';
           });
         });
       }
+      function clearDropMarker() {
+        document.querySelectorAll('.drop-before, .drop-after').forEach(el => el.classList.remove('drop-before', 'drop-after'));
+      }
+      function dropPosition(cell, y, id) {
+        const cards = [...cell.querySelectorAll('.task-card')].filter(el => el.dataset.id !== id);
+        const before = cards.find(el => { const rect = el.getBoundingClientRect(); return y < rect.top + rect.height / 2; });
+        return { beforeId: before?.dataset.id, marker: before || cards.at(-1), className: before ? 'drop-before' : 'drop-after' };
+      }
+      function clearDrag() {
+        draggedTask = null;
+        clearDropMarker();
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      }
+      document.addEventListener('dragend', clearDrag);
+      document.addEventListener('dragover', event => {
+        if (!draggedTask) return;
+        const target = event.target.closest('#today-panel, .cell');
+        clearDropMarker();
+        if (target?.matches('.cell')) {
+          const position = dropPosition(target, event.clientY, draggedTask.id);
+          position.marker?.classList.add(position.className);
+        }
+        document.querySelectorAll('.drag-over').forEach(el => { if (el !== target) el.classList.remove('drag-over'); });
+        if (target || draggedTask.fromToday) {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+          target?.classList.add('drag-over');
+        }
+      });
+      document.addEventListener('dragleave', event => {
+        const target = event.target.closest('#today-panel, .cell');
+        if (target && !target.contains(event.relatedTarget)) { target.classList.remove('drag-over'); clearDropMarker(); }
+      });
+      document.addEventListener('drop', async event => {
+        if (!draggedTask) return;
+        const { id, fromToday } = draggedTask;
+        const target = event.target.closest('#today-panel, .cell');
+        const position = target?.matches('.cell') ? dropPosition(target, event.clientY, id) : null;
+        clearDrag();
+        if (!target && !fromToday) return;
+        event.preventDefault();
+        const task = tasks.find(t => t.id === id);
+        if (!task || task.completed) return;
+        const previous = { today: task.today, importance: task.importance, urgency: task.urgency };
+        let reordered = false;
+        let message;
+        if (target === todayPanel) {
+          task.today = true;
+          message = 'Added to Today';
+        } else {
+          if (fromToday) task.today = false;
+          if (target?.matches('.cell')) {
+            reordered = reorderInCell(task, target, position.beforeId);
+          }
+          message = fromToday ? 'Removed from Today' : previous.importance === task.importance && previous.urgency === task.urgency ? 'Task reordered' : 'Task moved';
+        }
+        if (!reordered && task.today === previous.today && task.importance === previous.importance && task.urgency === previous.urgency) return;
+        if (await persist()) toast(message);
+      });
       function openEditor(id = '') {
         form.reset();
         const task = tasks.find(t => t.id === id);
@@ -427,6 +556,7 @@
         document.getElementById('task-importance').value = task?.importance || 'medium';
         document.getElementById('task-urgency').value = task?.urgency || 'medium';
         document.getElementById('task-doing').checked = task?.doing !== false;
+        document.getElementById('task-today').checked = task?.today === true;
         document.getElementById('delete-button').hidden = !task;
         updateDoingCopy();
         dialog.showModal();
@@ -501,9 +631,11 @@
           importance: document.getElementById('task-importance').value,
           urgency: document.getElementById('task-urgency').value,
           doing: document.getElementById('task-doing').checked,
+          today: document.getElementById('task-today').checked,
           completed: old?.completed || false,
           createdAt: old?.createdAt || new Date().toISOString()
         };
+        if (old && old.importance === task.importance && old.urgency === task.urgency) task.matrixOrder = old.matrixOrder;
         tasks = old ? tasks.map(t => t.id === id ? task : t) : [...tasks, task];
         dialog.close(); persist(); toast(old ? 'Task updated' : 'Task added');
       });

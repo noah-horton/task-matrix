@@ -10,9 +10,13 @@ For any activity involving tasks, ensure the web server process is running first
 
 ## Board
 
+Drag a card above or below another card in a matrix box to reorder it; the gold line shows where it will land. You can also choose its position when moving it into another box. Each box remembers its order across reloads, edits, Codex updates, and JSON backups. Reordering with filters active preserves the relative order of hidden cards. Boxes start in due-date order; after manual reordering, new cards appear after the ordered cards. Today and completed cards retain due-date order.
+
 Use Codex's in-app browser to open http://127.0.0.1:8765/. The board has the 3×3 importance/urgency matrix, task links and descriptions, due dates, Doing/Tracking filters, completion, drag-and-drop, and JSON import/export. It refreshes task changes made by Codex. The `open-task-matrix.sh` helper opens the board in the system's default browser.
 
 Classify a task by starting its name with a single word and a colon, such as `Brett: Follow up`. Prefix words can contain letters, numbers, and underscores; spaces and punctuation before the colon are not part of a prefix. The Prefix dropdown starts with All, followed by the distinct prefixes in title case, sorted alphabetically. For example, `BRETT:` and `brett:` both appear as Brett. The list includes open and completed tasks and updates after additions, renames, deletions, imports, and changes from Codex. If the selected prefix disappears, the filter returns to All. Prefix and Doing/Tracking filters combine and apply to the matrix, summary counts, and completed tasks. Task names retain their original spelling.
+
+Drag an open task into **Today** above the matrix to tag it for today while keeping its matrix position. Drag its Today card out anywhere on the board to remove the tag; dropping it in a matrix cell also updates its position. Moving the matrix copy between cells keeps its Today tag. You can also change Today in the task editor. Today follows both filters, excludes completed tasks, and persists until you remove the tag (it does not reset at midnight). The tag is preserved in JSON backups and Codex updates. `list_tasks` can filter by `today`, and `create_task` / `update_task` accept a boolean `today`.
 
 ## Create a macOS Dock entry
 
