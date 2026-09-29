@@ -24,4 +24,6 @@ The task file is data/tasks.json in this project. It is shared by the browser bo
 
 `open-task-matrix.sh` opens the board in the default external browser.
 
+To open the board from the macOS Dock with the shield logo, follow [Create a macOS Dock entry](plugin/README.md#create-a-macos-dock-entry). The square [PNG icon](plugin/assets/task-matrix-icon.png), [SVG source](plugin/assets/task-matrix-icon.svg), and [macOS icon](plugin/assets/task-matrix-icon.icns) are included in the plugin.
+
 The synced Obsidian prototype was copied for this package and left unchanged. If it contains browser-local tasks, export them from that original board and import the JSON backup into the installed board.

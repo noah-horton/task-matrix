@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">Task Matrix shield</title>
+  <desc id="desc">The gold shield and task matrix from the Task Matrix logo, centered on a transparent square.</desc>
+  <defs>
+    <linearGradient id="gold" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ead59a"/>
+      <stop offset=".52" stop-color="#bd9851"/>
+      <stop offset="1" stop-color="#8d6b34"/>
+    </linearGradient>
+  </defs>
+  <!-- Original shield paths, gradient, and ornaments preserved from task-matrix-logo.svg. -->
+  <g transform="translate(15 20.5)" fill="none" stroke="url(#gold)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M65 3c-5 9-18 12-32 13v46c0 29 17 48 32 57 15-9 32-28 32-57V16C83 15 70 12 65 3Z" stroke-width="3.5"/>
+    <path d="M65 12c-8 7-17 9-24 10v40c0 22 12 37 24 45 12-8 24-23 24-45V22c-7-1-16-3-24-10Z" stroke-width="1.5" opacity=".75"/>
+    <path d="M65 25v65M42 47h46M42 69h46" stroke-width="2.3"/>
+    <path d="m49 38 3 3 5-6M72 60l3 3 5-6M49 82l3 3 5-6" stroke-width="2.5"/>
+    <path d="M65 0v-7m0 133v-7M29 18l-7-4m79 4 7-4M29 99l-7 4m79-4 7 4" stroke-width="2"/>
+    <path d="M52 119c4 3 9 5 13 7 4-2 9-4 13-7" stroke-width="2"/>
+  </g>
+</svg>
