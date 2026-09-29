@@ -89,7 +89,6 @@
     .task-description { margin: 7px 0 0 25px; color: #77766f; font-size: 11px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
     .task-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 9px 0 0 25px; }
     .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; border-radius: 20px; background: #eeebe4; color: #686971; font-size: 10px; font-weight: 700; }
-    .pill.doing { color: var(--forest); background: var(--mint); }
     .pill.tracking { color: var(--blue); background: var(--blue-pale); }
     .pill.due { color: #686971; }
     .pill.due.overdue { color: var(--rose); background: var(--rose-pale); }
@@ -353,11 +352,11 @@
         const url = safeUrl(task.url);
         const due = task.dueDate ? `<span class="pill due${dueClass(task.dueDate)}">${escapeHtml(dateLabel(task.dueDate))}</span>` : '';
         const link = url ? `<span class="pill"><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Open external task link">↗ Link</a></span>` : '';
-        const role = task.doing === false ? '<span class="pill tracking">Tracking</span>' : '<span class="pill doing">Doing</span>';
+        const role = task.doing === false ? '<span class="pill tracking">Tracking</span>' : '';
         return `<article class="task-card${task.completed ? ' done' : ''}" data-id="${escapeHtml(task.id)}" ${task.completed ? '' : 'draggable="true"'}>
           <div class="task-title-row"><input class="complete-toggle" type="checkbox" ${task.completed ? 'checked' : ''} aria-label="Mark ${escapeHtml(task.name)} complete"><span class="task-title">${escapeHtml(task.name)}</span><button class="edit-task" type="button" aria-label="Edit ${escapeHtml(task.name)}" title="Edit task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14 5 5 5M4 20l4.3-.9L19 8.4a2.1 2.1 0 0 0-3-3L5.3 16.1 4 20Z"/></svg></button></div>
           ${task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : ''}
-          <div class="task-meta">${role}${due}${link}</div>
+          ${role || due || link ? `<div class="task-meta">${role}${due}${link}</div>` : ''}
         </article>`;
       }
       function cellId(importance, urgency) { return `cell-${importance}-${urgency}`; }
