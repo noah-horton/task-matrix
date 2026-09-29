@@ -66,10 +66,16 @@
     .row-head { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 5px; padding: 15px 13px 15px 8px; border-top: 1px solid var(--line); color: #565760; text-align: right; }
     .row-head strong { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
     .row-head span { color: #97948b; font-size: 10px; }
-    .cell { min-height: 196px; padding: 11px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--paper); transition: background .15s ease; }
+    .cell { display: flex; flex-direction: column; min-height: 196px; padding: 11px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--paper); transition: background .15s ease; }
     .cell:nth-child(4n + 2), .cell:nth-child(4n + 3), .cell:nth-child(4n + 4) { background: #fcfaf4; }
     .cell.drag-over { background: #f7edcf !important; box-shadow: inset 0 0 0 2px #d8b965; }
-    .task-list { display: grid; align-content: start; gap: 8px; }
+    .task-list { display: grid; flex: 1; align-content: start; gap: 8px; }
+    .quick-add { display: flex; gap: 6px; margin-top: 10px; }
+    .quick-add input { flex: 1; min-width: 0; height: 31px; padding: 0 9px; border: 1px solid var(--line); border-radius: 8px; outline: none; color: var(--ink); background: #fffefa; font-size: 11px; }
+    .quick-add input:focus { border-color: #c69b4a; box-shadow: 0 0 0 3px rgba(198,155,74,.18); }
+    .quick-add button { width: 31px; height: 31px; flex: 0 0 31px; padding: 0; border: 1px solid var(--line); border-radius: 8px; color: var(--forest-dark); background: #fffefa; font-size: 20px; line-height: 1; }
+    .quick-add button:hover { border-color: #cbbd9d; background: #fff4d8; }
+    .quick-add button:disabled { opacity: .5; cursor: wait; }
     .task-card { padding: 11px 11px 10px; border: 1px solid #e6dfd0; border-radius: 11px; background: #fffefa; box-shadow: 0 2px 6px rgba(43,39,31,.055); cursor: grab; }
     .task-card:active { cursor: grabbing; }
     .task-card.done { opacity: .59; }
@@ -90,7 +96,7 @@
     .pill.due.soon { color: #855913; background: var(--amber-pale); }
     .pill a { color: inherit; text-decoration: none; }
     .pill a:hover { text-decoration: underline; }
-    .empty { display: grid; min-height: 170px; place-items: center; padding: 18px; color: #97948b; text-align: center; font-size: 11px; }
+    .empty { display: grid; min-height: 125px; place-items: center; padding: 18px; color: #97948b; text-align: center; font-size: 11px; }
     .legend { display: flex; justify-content: space-between; gap: 18px; margin: 12px 4px 0; color: #89877f; font-size: 11px; }
     .legend span:last-child { text-align: right; }
     .done-panel { margin-top: 22px; }
@@ -249,6 +255,7 @@
       let filter = 'all';
       let prefixFilter = '';
       let doneOpen = false;
+      const quickDrafts = new Map();
       let toastTimer;
       const board = document.getElementById('board');
       const dialog = document.getElementById('task-dialog');
@@ -266,7 +273,7 @@
         const after = new Map(tasks.map(t => [t.id, t]));
         const upsert = [...after.values()].filter(t => JSON.stringify(t) !== JSON.stringify(before.get(t.id)));
         const deleteIds = [...before.keys()].filter(id => !after.has(id));
-        if (!upsert.length && !deleteIds.length) { render(); return; }
+        if (!upsert.length && !deleteIds.length) { render(); return true; }
         try {
           const response = await fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ upsert, deleteIds }) });
           const data = await response.json();
@@ -274,10 +281,12 @@
           tasks = data.tasks;
           savedTasks = structuredClone(tasks);
           render();
+          return true;
         } catch (error) {
           tasks = structuredClone(savedTasks);
           render();
           toast(error.message || 'Could not save tasks.');
+          return false;
         }
       }
       async function refreshTasks() {
@@ -367,7 +376,11 @@
             const list = document.createElement('div'); list.className = 'task-list';
             const items = ordered(tasks.filter(t => !t.completed && t.importance === importance && t.urgency === urgency && visible(t)));
             list.innerHTML = items.length ? items.map(card).join('') : `<div class="empty">${filter === 'all' && !prefixFilter ? 'No tasks here yet' : 'No matching tasks'}</div>`;
-            cell.append(list); board.append(cell);
+            const key = cellId(importance, urgency);
+            const quickAdd = document.createElement('form');
+            quickAdd.className = 'quick-add';
+            quickAdd.innerHTML = `<input type="text" name="name" maxlength="160" required autocomplete="off" placeholder="Add a task…" aria-label="New task in ${labels[importance]} importance, ${labels[urgency]} urgency" value="${escapeHtml(quickDrafts.get(key) || '')}"><button type="submit" aria-label="Add task to ${labels[importance]} importance, ${labels[urgency]} urgency" title="Add task">+</button>`;
+            cell.append(list, quickAdd); board.append(cell);
           }
         }
         const open = tasks.filter(t => !t.completed && visible(t));
@@ -429,6 +442,40 @@
         const el = document.getElementById('toast'); el.textContent = message; el.classList.add('show');
         clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1900);
       }
+      board.addEventListener('input', event => {
+        if (event.target.matches('.quick-add input')) {
+          quickDrafts.set(event.target.closest('.cell').id, event.target.value);
+        }
+      });
+      board.addEventListener('submit', async event => {
+        if (!event.target.matches('.quick-add')) return;
+        event.preventDefault();
+        if (event.target.dataset.saving) return;
+        const cell = event.target.closest('.cell');
+        const key = cell.id;
+        const input = event.target.elements.name;
+        const name = input.value.trim();
+        if (!name) { input.value = ''; input.reportValidity(); return; }
+        event.target.dataset.saving = 'true';
+        event.target.querySelector('button').disabled = true;
+        tasks.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name, description: '', url: '', dueDate: '',
+          importance: cell.dataset.importance, urgency: cell.dataset.urgency,
+          doing: filter !== 'tracking', completed: false, createdAt: new Date().toISOString()
+        });
+        if (await persist()) {
+          quickDrafts.delete(key);
+          if (prefixFilter && taskPrefix({ name }) !== prefixFilter) {
+            prefixFilter = '';
+          }
+          render();
+          board.querySelector(`#${key} .quick-add input`)?.focus();
+          toast('Task added');
+        } else {
+          board.querySelector(`#${key} .quick-add input`)?.focus();
+        }
+      });
       document.getElementById('add-button').addEventListener('click', () => openEditor());
       document.getElementById('close-dialog').addEventListener('click', () => dialog.close());
       document.getElementById('cancel-button').addEventListener('click', () => dialog.close());
