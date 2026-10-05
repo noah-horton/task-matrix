@@ -2,7 +2,6 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PLUGIN_CREATOR="/Users/noahhorton/.codex/skills/.system/plugin-creator"
 PLUGIN_HOME="$HOME/plugins/task-matrix"
 MARKETPLACE_FILE="$HOME/.agents/plugins/marketplace.json"
 AGENTS_DIR="$HOME/Library/LaunchAgents"
@@ -11,26 +10,16 @@ LABEL="net.noahhorton.task-matrix"
 UID_VALUE="$(id -u)"
 DATA_FILE="$PROJECT_DIR/data/tasks.json"
 
-if [[ ! -f "$PLUGIN_CREATOR/scripts/create_basic_plugin.py" ]]; then
-  echo "Codex plugin-creator helper was not found: $PLUGIN_CREATOR" >&2
-  exit 1
-fi
-
-if [[ ! -f "$MARKETPLACE_FILE" ]]; then
-  python3 "$PLUGIN_CREATOR/scripts/create_basic_plugin.py" task-matrix --path "$HOME/plugins" --with-mcp --with-marketplace
-else
-  MARKETPLACE_NAME="$(python3 "$PLUGIN_CREATOR/scripts/read_marketplace_name.py")"
-  if ! python3 - "$MARKETPLACE_FILE" <<'PY'
+python3 - "$MARKETPLACE_FILE" "$PLUGIN_HOME" <<'PYTHON'
 import json, sys
 from pathlib import Path
-market = json.loads(Path(sys.argv[1]).read_text())
-raise SystemExit(0 if any(p.get("name") == "task-matrix" for p in market.get("plugins", []) if isinstance(p, dict)) else 1)
-PY
-  then
-    python3 "$PLUGIN_CREATOR/scripts/create_basic_plugin.py" task-matrix --path "$HOME/plugins" --with-mcp --with-marketplace --marketplace-name "$MARKETPLACE_NAME"
-  fi
-  [[ -d "$PLUGIN_HOME" ]] || mkdir -p "$PLUGIN_HOME"
-fi
+marketplace = Path(sys.argv[1])
+marketplace.parent.mkdir(parents=True, exist_ok=True)
+market = json.loads(marketplace.read_text()) if marketplace.exists() else {"name": "personal", "interface": {"displayName": "Personal"}, "plugins": []}
+if not any(p.get("name") == "task-matrix" for p in market.get("plugins", []) if isinstance(p, dict)):
+    market.setdefault("plugins", []).append({"name": "task-matrix", "source": {"source": "local", "path": sys.argv[2]}, "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}, "category": "Productivity"})
+    marketplace.write_text(json.dumps(market, indent=2) + "\n")
+PYTHON
 mkdir -p "$PLUGIN_HOME"
 cp -R "$PROJECT_DIR/plugin/." "$PLUGIN_HOME/"
 python3 - "$PLUGIN_HOME/.mcp.json" "$PLUGIN_HOME/server.py" "$DATA_FILE" <<'PY'
@@ -45,8 +34,20 @@ server["env"]["TASK_MATRIX_DATA"] = sys.argv[3]
 manifest.write_text(json.dumps(config, indent=2) + "\n")
 PY
 mkdir -p "$PROJECT_DIR/data"
-python3 "$PLUGIN_CREATOR/scripts/update_plugin_cachebuster.py" "$PLUGIN_HOME"
-MARKETPLACE_NAME="$(python3 "$PLUGIN_CREATOR/scripts/read_marketplace_name.py")"
+python3 - "$PLUGIN_HOME/.codex-plugin/plugin.json" <<'PYTHON'
+import datetime, json, sys
+from pathlib import Path
+manifest = Path(sys.argv[1])
+plugin = json.loads(manifest.read_text())
+plugin["version"] = plugin["version"].split("+")[0] + "+codex." + datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d%H%M%S%f")
+manifest.write_text(json.dumps(plugin, indent=2) + "\n")
+PYTHON
+MARKETPLACE_NAME="$(python3 - "$MARKETPLACE_FILE" <<'PYTHON'
+import json, sys
+from pathlib import Path
+print(json.loads(Path(sys.argv[1]).read_text())["name"])
+PYTHON
+)"
 codex plugin add "task-matrix@$MARKETPLACE_NAME"
 
 mkdir -p "$AGENTS_DIR"

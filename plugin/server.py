@@ -123,12 +123,22 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(200, {"tasks": read_tasks()})
         if path == "/health":
             return self.send_json(200, {"ok": True, "dataFile": str(DATA_FILE)})
-        if path in ("/", "/index.html"):
-            body = (ROOT / "index.html").read_bytes()
+        static_files = {
+            "/": ("index.html", "text/html; charset=utf-8"),
+            "/index.html": ("index.html", "text/html; charset=utf-8"),
+            "/manifest.webmanifest": ("manifest.webmanifest", "application/manifest+json"),
+            "/sw.js": ("sw.js", "text/javascript; charset=utf-8"),
+            "/offline.html": ("offline.html", "text/html; charset=utf-8"),
+        }
+        for name in ("task-matrix-icon.svg", "favicon-32.png", "apple-touch-icon.png", "pwa-icon-192.png", "pwa-icon-512.png"):
+            static_files[f"/assets/{name}"] = (f"assets/{name}", "image/svg+xml" if name.endswith(".svg") else "image/png")
+        if path in static_files:
+            filename, content_type = static_files[path]
+            body = (ROOT / filename).read_bytes()
             self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(body)))
-            self.send_header("Cache-Control", "no-store")
+            self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             return self.wfile.write(body)
         return self.send_json(404, {"error": "Not found"})

@@ -12,7 +12,7 @@ cd task-matrix
 ./install-local.sh
 ```
 
-The installer copies the plugin into `~/plugins/task-matrix`, registers it in your personal Codex marketplace, installs it with `codex plugin add`, and starts the board service as a per-user LaunchAgent. It writes the MCP server and data file paths for your checkout, so you can clone the repository into any directory. The installer also uses the plugin-creator helper bundled with Codex at `~/.codex/skills/.system/plugin-creator`.
+The installer copies the plugin into `~/plugins/task-matrix`, registers it in your personal Codex marketplace, installs it with `codex plugin add`, and starts the board service as a per-user LaunchAgent. It writes the MCP server and data file paths for your checkout, so you can clone the repository into any directory.
 
 After installation, start a new Codex chat to load the tools. Open the board in Codex's in-app browser at `http://127.0.0.1:8765/` and keep it open while working with tasks. The installer starts the server automatically at login; if needed, start it with `python3 ~/plugins/task-matrix/server.py web`.
 
@@ -27,3 +27,9 @@ The task file is data/tasks.json in this project. It is shared by the browser bo
 To open the board from the macOS Dock with the shield logo, follow [Create a macOS Dock entry](plugin/README.md#create-a-macos-dock-entry). The square [PNG icon](plugin/assets/task-matrix-icon.png), [SVG source](plugin/assets/task-matrix-icon.svg), and [macOS icon](plugin/assets/task-matrix-icon.icns) are included in the plugin.
 
 The synced Obsidian prototype was copied for this package and left unchanged. If it contains browser-local tasks, export them from that original board and import the JSON backup into the installed board.
+
+## Install as a web app
+
+Open `http://127.0.0.1:8765/` in Chrome or Edge and select the browser's Install Task Matrix action (in the address bar or browser menu). In Safari on macOS, use File → Add to Dock. The installed app opens in its own window and uses the same shield as the Dock icon and favicon.
+
+The local LaunchAgent must keep running for the app to read or edit tasks. If the service is unavailable, the app shows a retry page; task data and edits are never cached by the service worker. Browser installation is separate from installing the Codex plugin.

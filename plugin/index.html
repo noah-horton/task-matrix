@@ -4,6 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#191b22">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/assets/task-matrix-icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="Task Matrix">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Task Matrix</title>
   <style>
     :root {
@@ -672,6 +678,9 @@
         } catch (error) { toast(error.message || 'Could not import that file'); }
         event.target.value = '';
       });
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(error => console.warn('Service worker registration failed', error));
+      }
       loadTasks().then(() => { render(); setInterval(refreshTasks, 3000); }).catch(error => { toast(error.message); });
     })();
   </script>
